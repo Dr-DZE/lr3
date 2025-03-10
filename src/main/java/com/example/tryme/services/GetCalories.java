@@ -1,5 +1,6 @@
 package com.example.tryme.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpEntity;
@@ -31,8 +32,6 @@ public class GetCalories {
         // Set body parameters
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("term", query);
-        body.add("_type", "query");
-        body.add("q", query);
 
         // Create the request entity
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
@@ -44,35 +43,32 @@ public class GetCalories {
     }
 
     @SuppressWarnings("CallToPrintStackTrace")
-    public String g(String query) {    
+    public String GetNameFromWeb(String query) {    
 
         try {
             String body = this.sendPostRequest(query);
             ObjectMapper objectMapper = new ObjectMapper();
             String response = "";
-            try {
-                JsonNode jsonNode = objectMapper.readTree(body);
-                JsonNode match = jsonNode.get("results").get(0);
-                System.out.println(match);
-                response += match.get("text").asText();
-                response += " / cal/100g: ";
-                response += match.get("cal").asText();
-                return response;
-            } catch (final JsonProcessingException e) {
-                return "lol somethig went wrong";
-            }
-        } catch (Exception e) {
+        
+            JsonNode jsonNode = objectMapper.readTree(body);
+            JsonNode match = jsonNode.get("results").get(0);
+            System.out.println(match);
+            response += match.get("text").asText();
+            response += " / cal/100g: ";
+            response += match.get("cal").asText();
+            return response;
+        
+        } catch (JsonProcessingException e) {
             return "lol somethig went wrong";
         }
     }
 
     @SuppressWarnings("CallToPrintStackTrace")
-    public int gi(String query) {    
+    public int GetCaloriesFromWeb(String query) {    
 
         try {
             String body = this.sendPostRequest(query);
             ObjectMapper objectMapper = new ObjectMapper();
-            // String response = "";
             try {
                 JsonNode jsonNode = objectMapper.readTree(body);
                 JsonNode match = jsonNode.get("results").get(0);
@@ -85,13 +81,14 @@ public class GetCalories {
         }
     }
         
-    public String Show(Integer ProductList, String[] food, Integer[] gram){
-        String gopa = "";
+    public List<String> Show(Integer ProductList, String[] food, Integer[] gram){
+        List<String> ewrg = new ArrayList<>();
 
         for (int i = 0; i < ProductList; i++){
-            gopa += gram[i] + "g." + " " + this.g(food[i]) + " total calories: " + (this.gi(food[i]) * gram[i] / 100) + "\n";
+            String temp = gram[i] + "g." + " " + this.GetNameFromWeb(food[i]) + " total calories: " + (this.GetCaloriesFromWeb(food[i]) * gram[i] / 100) + "\n";
+            ewrg.add(temp);
         }
 
-        return gopa;
+        return ewrg;
     }
 }
