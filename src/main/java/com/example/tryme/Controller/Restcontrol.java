@@ -10,16 +10,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.tryme.services.GetCalories;
 
 @RestController
-public class Restcontrol {
+public class Restcontrol 
+{
 
 	@Autowired
 	private GetCalories calculator;
 
 	@GetMapping("/CalculateCalories") 
-	public List<String> get(@RequestParam Integer ProductList,  
-			@RequestParam String[] food, 
-			@RequestParam Integer[] gram) {
-		return calculator.Show(ProductList, food, gram);
+	public List<String> get(@RequestParam Integer productList,  
+        @RequestParam String[] food, 
+		@RequestParam Integer[] gram) 
+    {
+		return calculator.show(productList, food, gram);
 	}
 
 }

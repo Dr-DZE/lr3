@@ -17,11 +17,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
-public class GetCalories {
+public class GetCalories 
+{
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public String sendPostRequest(String query) {
+    public String sendPostRequest(String query) 
+    {
         String url = "https://calculat.ru/wp-content/themes/EmptyCanvas/db123.php";
 
         // Set headers
@@ -35,7 +37,7 @@ public class GetCalories {
 
         // Create the request entity
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
-        // comment
+        
         // Send POST request
         ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
         
@@ -43,9 +45,11 @@ public class GetCalories {
     }
 
     @SuppressWarnings("CallToPrintStackTrace")
-    public String GetNameFromWeb(String query) {    
+    public String getNameFromWeb(String query) 
+    {    
 
-        try {
+        try 
+        {
             String body = this.sendPostRequest(query);
             ObjectMapper objectMapper = new ObjectMapper();
             String response = "";
@@ -58,37 +62,50 @@ public class GetCalories {
             response += match.get("cal").asText();
             return response;
         
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException e) 
+        {
             return "lol somethig went wrong";
         }
     }
 
     @SuppressWarnings("CallToPrintStackTrace")
-    public int GetCaloriesFromWeb(String query) {    
+    public int getCaloriesFromWeb(String query) 
+    {    
 
-        try {
+        try 
+        {
             String body = this.sendPostRequest(query);
             ObjectMapper objectMapper = new ObjectMapper();
-            try {
+            try 
+            {
                 JsonNode jsonNode = objectMapper.readTree(body);
                 JsonNode match = jsonNode.get("results").get(0);
                 return match.get("cal").asInt();
-            } catch (final JsonProcessingException e) {
+            } catch (final JsonProcessingException e) 
+            {
                 return -1;
             }
-        } catch (Exception e) {
+        } catch (Exception e) 
+        {
             return -1;
         }
     }
         
-    public List<String> Show(Integer ProductList, String[] food, Integer[] gram){
-        List<String> list = new ArrayList<>();
+    public List<String> show(Integer ProductList, String[] food, Integer[] gram) 
+    {
+        List<String> listOfProducts = new ArrayList<>();
 
-        for (int i = 0; i < ProductList; i++){
-            String temp = gram[i] + "g." + " " + this.GetNameFromWeb(food[i]) + " total calories: " + (this.GetCaloriesFromWeb(food[i]) * gram[i] / 100) + "\n";
-            list.add(temp);
+        Integer totalCalories = 0;
+        for (int i = 0; i < ProductList; i++)
+        {
+            String temp = gram[i] + "g." + " " + this.getNameFromWeb(food[i]);
+            totalCalories += this.getCaloriesFromWeb(food[i]) * gram[i] / 100;
+            listOfProducts.add(temp);
         }
 
-        return list;
+        String temp = "Total calories: " + totalCalories;
+        listOfProducts.add(temp);
+
+        return listOfProducts;
     }
 }
