@@ -82,13 +82,13 @@ public class GetCalories {
     }
         
     public List<String> Show(Integer ProductList, String[] food, Integer[] gram){
-        List<String> ewrg = new ArrayList<>();
+        List<String> list = new ArrayList<>();
 
         for (int i = 0; i < ProductList; i++){
             String temp = gram[i] + "g." + " " + this.GetNameFromWeb(food[i]) + " total calories: " + (this.GetCaloriesFromWeb(food[i]) * gram[i] / 100) + "\n";
-            ewrg.add(temp);
+            list.add(temp);
         }
 
-        return ewrg;
+        return list;
     }
 }
