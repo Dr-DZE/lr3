@@ -2,22 +2,24 @@ package com.example.tryme.Model;
 
 public class ProductList {
 
-    private Integer productList;
+    private Integer productNumber;
     private String[] food;
     private Integer[] gram;
+    private Integer[] caloriesIn100;
 
     public ProductList() { }
 
-    public ProductList(Integer productList, String[] food, Integer[] gram)
+    public ProductList(Integer productNumber, String[] food, Integer[] gram, Integer[] caloriesIn100)
     {
-        this.productList = productList;
+        this.productNumber = productNumber;
         this.food = food;
         this.gram = gram;
+        this.caloriesIn100 = caloriesIn100;
     }
 
-    public void setProductList(Integer productList)
+    public void setProductNumber(Integer productNumber)
     {
-        this.productList = productList;
+        this.productNumber = productNumber;
     }
 
     public void setFood(String[] food)
@@ -30,10 +32,14 @@ public class ProductList {
         this.gram = gram;
     }
 
-
-    public Integer getProductList()
+    public void setCaloriesIn100(Integer[] caloriesIn100)
     {
-        return productList;
+        this.caloriesIn100 = caloriesIn100;
+    }
+
+    public Integer getProductNumber()
+    {
+        return productNumber;
     }
 
     public String[] getFood()
@@ -46,4 +52,8 @@ public class ProductList {
         return gram;
     }
 
+    public Integer[] getCaloriesIn100()
+    {
+        return caloriesIn100;
+    }
 }

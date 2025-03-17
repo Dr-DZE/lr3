@@ -7,21 +7,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.tryme.services.GetCalories;
+import com.example.tryme.services.CaloriesService;
 
 @RestController
-public class Restcontrol 
+public class CaloriesController 
 {
 
 	@Autowired
-	private GetCalories calculator;
+	private CaloriesService calculator;
 
 	@GetMapping("/CalculateCalories") 
-	public List<String> get(@RequestParam Integer productList,  
+	public List<String> get(@RequestParam Integer productNumber,  
         @RequestParam String[] food, 
 		@RequestParam Integer[] gram) 
     {
-		return calculator.show(productList, food, gram);
+		return calculator.show(productNumber, food, gram);
 	}
 
 }
