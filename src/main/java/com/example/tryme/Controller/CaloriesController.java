@@ -17,11 +17,11 @@ public class CaloriesController
 	private CaloriesService calculator;
 
 	@GetMapping("/CalculateCalories") 
-	public List<String> get(@RequestParam Integer productNumber,  
+	public List<String> get(@RequestParam Integer productCount,  
         @RequestParam String[] food, 
 		@RequestParam Integer[] gram) 
     {
-		return calculator.show(productNumber, food, gram);
+		return calculator.show(productCount, food, gram);
 	}
 
 }

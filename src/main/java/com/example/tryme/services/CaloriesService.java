@@ -56,7 +56,6 @@ public class CaloriesService
         
             JsonNode jsonNode = objectMapper.readTree(body);
             JsonNode match = jsonNode.get("results").get(0);
-            // System.out.println(match);
 
             response += match.get("text").asText();
             response += " / cal/100g: ";
@@ -70,37 +69,14 @@ public class CaloriesService
         }
     }
 
-    // @SuppressWarnings("CallToPrintStackTrace")
-    // private int getCaloriesFromWeb(String query) 
-    // {    
-
-    //     try 
-    //     {
-    //         String body = this.sendPostRequest(query);
-    //         ObjectMapper objectMapper = new ObjectMapper();
-    //         try 
-    //         {
-    //             JsonNode jsonNode = objectMapper.readTree(body);
-    //             JsonNode match = jsonNode.get("results").get(0);
-    //             return match.get("cal").asInt();
-    //         } catch (final JsonProcessingException e) 
-    //         {
-    //             return -1;
-    //         }
-    //     } catch (Exception e) 
-    //     {
-    //         return -1;
-    //     }
-    // }
-        
-    public List<String> show(Integer productNumber, String[] food, Integer[] gram) 
+    public List<String> show(Integer productCount, String[] food, Integer[] gram) 
     {
         List<String> listOfProducts = new ArrayList<>();
 
-        Integer[] caloriesIn100 = new Integer[productNumber];
+        Integer[] caloriesIn100 = new Integer[productCount];
 
         Integer totalCalories = 0;
-        for (int i = 0; i < productNumber; i++)
+        for (int i = 0; i < productCount; i++)
         {
             String temp = gram[i] + "g." + " " + this.getNameFromWeb(food[i], caloriesIn100, i);
             totalCalories += caloriesIn100[i] * gram[i] / 100;
