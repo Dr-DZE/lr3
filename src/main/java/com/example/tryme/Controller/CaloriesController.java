@@ -1,27 +1,26 @@
 package com.example.tryme.Controller;
 
+import com.example.tryme.services.CaloriesService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.example.tryme.services.CaloriesService;
-
 @RestController
-public class CaloriesController 
-{
+@RequestMapping("/api/calories")
+public class CaloriesController {
+    private final CaloriesService caloriesService;
 
-	@Autowired
-	private CaloriesService calculator;
+    @Autowired
+    public CaloriesController(CaloriesService caloriesService) {
+        this.caloriesService = caloriesService;
+    }
 
-	@GetMapping("/CalculateCalories") 
-	public List<String> get(@RequestParam Integer productCount,  
-        @RequestParam String[] food, 
-		@RequestParam Integer[] gram) 
-    {
-		return calculator.show(productCount, food, gram);
-	}
-
+    @GetMapping("/calculate")
+    public List<String> calculateCalories(
+            @RequestParam Integer productCount,
+            @RequestParam String[] food,
+            @RequestParam Integer[] gram) {
+        return caloriesService.calculateCalories(productCount, food, gram);
+    }
 }
