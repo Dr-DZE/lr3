@@ -30,13 +30,13 @@ public class CaloriesController {
     }
     // http://localhost:8080/api/meals/calculate?productCount=2&food=%D1%8F%D0%B9&food=%D0%B2%D1%8B&gram=10&gram=10
 
-    @PostMapping("/create")
+    @GetMapping("/create")
     public String createMeal(@RequestParam String mealName) {
         return caloriesService.createMeal(mealName);
     }
     // http://localhost:8080/api/meals/create?mealName=Завтрак
 
-    @PostMapping("/add-product")
+    @GetMapping("/add-product")
     public String addProductToMeal(
             @RequestParam Long mealId,
             @RequestParam String productName,

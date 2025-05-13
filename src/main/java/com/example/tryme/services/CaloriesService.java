@@ -55,7 +55,6 @@ public class CaloriesService {
             caloriesIn100[numberOfFood] = match.get("cal").asInt();
             response += match.get("cal").asText();
             
-            // Сохраняем продукт в базу данных
             Product product = new Product(match.get("text").asText(), match.get("cal").asInt());
             productRepository.save(product);
             
@@ -70,7 +69,6 @@ public class CaloriesService {
         Integer[] caloriesIn100 = new Integer[productCount];
         Integer totalCalories = 0;
 
-        // Создаем новый прием пищи
         Meal meal = new Meal("Meal " + new Date());
         mealRepository.save(meal);
 
@@ -79,7 +77,6 @@ public class CaloriesService {
             totalCalories += caloriesIn100[i] * gram[i] / 100;
             listOfProducts.add(temp);
 
-            // Сохраняем связь продукта с приемом пищи
             Product product = productRepository.findByNameContainingIgnoreCase(food[i]).get(0);
             MealProduct mealProduct = new MealProduct(gram[i], meal, product);
             mealProductRepository.save(mealProduct);

@@ -7,20 +7,19 @@ public class MealProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private Integer grams;
-    
+
     @ManyToOne
     @JoinColumn(name = "meal_id")
     private Meal meal;
-    
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 
-    // Конструкторы, геттеры и сеттеры
     public MealProduct() {}
-    
+
     public MealProduct(Integer grams, Meal meal, Product product) {
         this.grams = grams;
         this.meal = meal;

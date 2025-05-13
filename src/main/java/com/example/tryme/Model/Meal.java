@@ -8,15 +8,14 @@ public class Meal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String name;
-    
+
     @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL)
     private List<MealProduct> products;
 
-    // Конструкторы, геттеры и сеттеры
     public Meal() {}
-    
+
     public Meal(String name) {
         this.name = name;
     }

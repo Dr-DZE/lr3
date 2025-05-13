@@ -8,16 +8,15 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String name;
     private Integer caloriesPer100g;
-    
+
     @OneToMany(mappedBy = "product")
     private List<MealProduct> mealProducts;
 
-    // Конструкторы, геттеры и сеттеры
     public Product() {}
-    
+
     public Product(String name, Integer caloriesPer100g) {
         this.name = name;
         this.caloriesPer100g = caloriesPer100g;
