@@ -110,4 +110,23 @@ public class CaloriesService {
         return String.format("Added %dg of %s (%d kcal) to meal '%s'",
                 grams, product.getName(), calories, meal.getName());
     }
+    public Meal getMeal(Long id) {
+    return mealRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Meal not found"));
+    }
+
+    public String updateMeal(Long id, String newName) {
+        Meal meal = mealRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Meal not found"));
+        meal.setName(newName);
+        mealRepository.save(meal);
+        return "Meal updated to '" + newName + "'";
+    }
+
+    public String deleteMeal(Long id) {
+        Meal meal = mealRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Meal not found"));
+        mealRepository.delete(meal);
+        return "Meal deleted";
+    }
 }
