@@ -1,9 +1,7 @@
 package com.example.tryme.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 public class Product {
@@ -13,6 +11,9 @@ public class Product {
     
     private String name;
     private Integer caloriesPer100g;
+    
+    @OneToMany(mappedBy = "product")
+    private List<MealProduct> mealProducts;
 
     // Конструкторы, геттеры и сеттеры
     public Product() {}
@@ -28,4 +29,6 @@ public class Product {
     public void setName(String name) { this.name = name; }
     public Integer getCaloriesPer100g() { return caloriesPer100g; }
     public void setCaloriesPer100g(Integer caloriesPer100g) { this.caloriesPer100g = caloriesPer100g; }
+    public List<MealProduct> getMealProducts() { return mealProducts; }
+    public void setMealProducts(List<MealProduct> mealProducts) { this.mealProducts = mealProducts; }
 }

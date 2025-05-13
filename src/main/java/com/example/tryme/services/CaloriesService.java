@@ -1,30 +1,28 @@
 package com.example.tryme.services;
 
-import com.example.tryme.Model.Product;
-import com.example.tryme.Repository.ProductRepository;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import com.example.tryme.Model.*;
+import com.example.tryme.Repository.*;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.util.*;
 import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.*;
+import java.util.*;
 
 @Service
 public class CaloriesService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ProductRepository productRepository;
+    private final MealRepository mealRepository;
+    private final MealProductRepository mealProductRepository;
 
-    public CaloriesService(ProductRepository productRepository) {
+    public CaloriesService(ProductRepository productRepository, 
+                         MealRepository mealRepository,
+                         MealProductRepository mealProductRepository) {
         this.productRepository = productRepository;
+        this.mealRepository = mealRepository;
+        this.mealProductRepository = mealProductRepository;
     }
 
     private String sendPostRequest(String query) {
@@ -72,13 +70,47 @@ public class CaloriesService {
         Integer[] caloriesIn100 = new Integer[productCount];
         Integer totalCalories = 0;
 
+        // Создаем новый прием пищи
+        Meal meal = new Meal("Meal " + new Date());
+        mealRepository.save(meal);
+
         for (int i = 0; i < productCount; i++) {
             String temp = gram[i] + "g." + " " + this.getNameFromWeb(food[i], caloriesIn100, i);
             totalCalories += caloriesIn100[i] * gram[i] / 100;
             listOfProducts.add(temp);
+
+            // Сохраняем связь продукта с приемом пищи
+            Product product = productRepository.findByNameContainingIgnoreCase(food[i]).get(0);
+            MealProduct mealProduct = new MealProduct(gram[i], meal, product);
+            mealProductRepository.save(mealProduct);
         }
 
         listOfProducts.add("Total calories: " + totalCalories);
         return listOfProducts;
+    }
+
+    public String createMeal(String mealName) {
+        Meal meal = new Meal(mealName);
+        mealRepository.save(meal);
+        return "Meal '" + mealName + "' created with ID: " + meal.getId();
+    }
+
+    public String addProductToMeal(Long mealId, String productName, Integer grams) {
+        Meal meal = mealRepository.findById(mealId)
+                .orElseThrow(() -> new RuntimeException("Meal not found"));
+        
+        List<Product> products = productRepository.findByNameContainingIgnoreCase(productName);
+        if (products.isEmpty()) {
+            return "Product not found. Please add it first using the calculate endpoint.";
+        }
+        Product product = products.get(0);
+        
+        MealProduct mealProduct = new MealProduct(grams, meal, product);
+        mealProductRepository.save(mealProduct);
+        
+        int calories = product.getCaloriesPer100g() * grams / 100;
+        
+        return String.format("Added %dg of %s (%d kcal) to meal '%s'",
+                grams, product.getName(), calories, meal.getName());
     }
 }
