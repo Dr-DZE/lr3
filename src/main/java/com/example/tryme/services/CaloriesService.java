@@ -129,4 +129,74 @@ public class CaloriesService {
         mealRepository.delete(meal);
         return "Meal deleted";
     }
+
+    public List<Meal> getAllMeals() {
+    return mealRepository.findAll();
+    }
+
+    public List<MealProduct> getAllMealProducts() {
+        return mealProductRepository.findAll();
+    }
+
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
+    public String createMealProduct(Integer grams, Long mealId, Long productId) {
+        Meal meal = mealRepository.findById(mealId)
+                .orElseThrow(() -> new RuntimeException("Meal not found"));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        
+        MealProduct mealProduct = new MealProduct(grams, meal, product);
+        mealProductRepository.save(mealProduct);
+        return "MealProduct created with ID: " + mealProduct.getId();
+    }
+
+    public MealProduct getMealProduct(Long id) {
+        return mealProductRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("MealProduct not found"));
+    }
+
+    public String updateMealProduct(Long id, Integer grams) {
+        MealProduct mealProduct = mealProductRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("MealProduct not found"));
+        mealProduct.setGrams(grams);
+        mealProductRepository.save(mealProduct);
+        return "MealProduct updated";
+    }
+
+    public String deleteMealProduct(Long id) {
+        MealProduct mealProduct = mealProductRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("MealProduct not found"));
+        mealProductRepository.delete(mealProduct);
+        return "MealProduct deleted";
+    }
+
+    public String createProduct(String name, Integer caloriesPer100g) {
+        Product product = new Product(name, caloriesPer100g);
+        productRepository.save(product);
+        return "Product created with ID: " + product.getId();
+    }
+
+    public Product getProduct(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+    }
+
+    public String updateProduct(Long id, String name, Integer caloriesPer100g) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setName(name);
+        product.setCaloriesPer100g(caloriesPer100g);
+        productRepository.save(product);
+        return "Product updated";
+    }
+
+    public String deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        productRepository.delete(product);
+        return "Product deleted";
+    }
 }
