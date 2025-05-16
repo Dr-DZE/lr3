@@ -13,40 +13,51 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.tryme.Model.MealProduct;
-import com.example.tryme.services.CaloriesService;
+import com.example.tryme.services.MealProductService;
+import com.example.tryme.services.MealService;
+import com.example.tryme.services.ProductService;
 
 @RestController
 @RequestMapping("/mealProducts")
 public class MealProductController {
-    private final CaloriesService caloriesService;
+    private final MealProductService mealProductService;
+    private final MealService mealService;
+    private final ProductService productService;
 
     @Autowired
-    public MealProductController(CaloriesService caloriesService) {
-        this.caloriesService = caloriesService;
+    public MealProductController(MealProductService mealProductService,
+                               MealService mealService,
+                               ProductService productService) {
+        this.mealProductService = mealProductService;
+        this.mealService = mealService;
+        this.productService = productService;
     }
 
     @PostMapping("/create")
-    public String createMealProduct(@RequestParam Integer grams, @RequestParam Long mealId, @RequestParam Long productId) {
-        return caloriesService.createMealProduct(grams, mealId, productId);
+    public String createMealProduct(
+            @RequestParam Integer grams,
+            @RequestParam Long mealId,
+            @RequestParam Long productId) {
+        return mealProductService.createMealProduct(grams, mealId, productId, mealService, productService);
     }
 
     @GetMapping("/{id}")
     public MealProduct getMealProduct(@PathVariable Long id) {
-        return caloriesService.getMealProduct(id);
+        return mealProductService.getMealProduct(id);
     }
 
     @PutMapping("/update/{id}")
     public String updateMealProduct(@PathVariable Long id, @RequestParam Integer grams) {
-        return caloriesService.updateMealProduct(id, grams);
+        return mealProductService.updateMealProduct(id, grams);
     }
 
     @DeleteMapping("/delete/{id}")
     public String deleteMealProduct(@PathVariable Long id) {
-        return caloriesService.deleteMealProduct(id);
+        return mealProductService.deleteMealProduct(id);
     }
 
     @GetMapping("/")
     public List<MealProduct> getAllMealProducts() {
-        return caloriesService.getAllMealProducts();
+        return mealProductService.getAllMealProducts();
     }
 }

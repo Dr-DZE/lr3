@@ -1,14 +1,27 @@
 package com.example.tryme.services;
 
-import com.example.tryme.Model.*;
-import com.example.tryme.Repository.*;
-import org.springframework.http.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.*;
-import java.util.*;
+
+import com.example.tryme.Model.Meal;
+import com.example.tryme.Model.MealProduct;
+import com.example.tryme.Model.Product;
+import com.example.tryme.Repository.MealProductRepository;
+import com.example.tryme.Repository.MealRepository;
+import com.example.tryme.Repository.ProductRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class CaloriesService {
@@ -41,6 +54,29 @@ public class CaloriesService {
         return response.getBody();
     }
 
+    public List<String> calculateCalories(Integer productCount, String[] food, Integer[] gram) {
+        List<String> listOfProducts = new ArrayList<>();
+        Integer[] caloriesIn100 = new Integer[productCount];
+        Integer totalCalories = 0;
+
+        Meal meal = new Meal("Meal " + new Date());
+        mealRepository.save(meal);
+
+        for (int i = 0; i < productCount; i++) {
+            String response = getNameFromWeb(food[i], caloriesIn100, i);
+            String temp = gram[i] + "g." + " " + response;
+            totalCalories += caloriesIn100[i] * gram[i] / 100;
+            listOfProducts.add(temp);
+
+            Product product = productRepository.findByNameContainingIgnoreCase(food[i]).get(0);
+            MealProduct mealProduct = new MealProduct(gram[i], meal, product);
+            mealProductRepository.save(mealProduct);
+        }
+
+        listOfProducts.add("Total calories: " + totalCalories);
+        return listOfProducts;
+    }
+
     private String getNameFromWeb(String query, Integer[] caloriesIn100, Integer numberOfFood) {    
         try {
             String body = this.sendPostRequest(query);
@@ -64,34 +100,6 @@ public class CaloriesService {
         }
     }
 
-    public List<String> calculateCalories(Integer productCount, String[] food, Integer[] gram) {
-        List<String> listOfProducts = new ArrayList<>();
-        Integer[] caloriesIn100 = new Integer[productCount];
-        Integer totalCalories = 0;
-
-        Meal meal = new Meal("Meal " + new Date());
-        mealRepository.save(meal);
-
-        for (int i = 0; i < productCount; i++) {
-            String temp = gram[i] + "g." + " " + this.getNameFromWeb(food[i], caloriesIn100, i);
-            totalCalories += caloriesIn100[i] * gram[i] / 100;
-            listOfProducts.add(temp);
-
-            Product product = productRepository.findByNameContainingIgnoreCase(food[i]).get(0);
-            MealProduct mealProduct = new MealProduct(gram[i], meal, product);
-            mealProductRepository.save(mealProduct);
-        }
-
-        listOfProducts.add("Total calories: " + totalCalories);
-        return listOfProducts;
-    }
-
-    public String createMeal(String mealName) {
-        Meal meal = new Meal(mealName);
-        mealRepository.save(meal);
-        return "Meal '" + mealName + "' created with ID: " + meal.getId();
-    }
-
     public String addProductToMeal(Long mealId, String productName, Integer grams) {
         Meal meal = mealRepository.findById(mealId)
                 .orElseThrow(() -> new RuntimeException("Meal not found"));
@@ -109,94 +117,5 @@ public class CaloriesService {
         
         return String.format("Added %dg of %s (%d kcal) to meal '%s'",
                 grams, product.getName(), calories, meal.getName());
-    }
-    public Meal getMeal(Long id) {
-    return mealRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Meal not found"));
-    }
-
-    public String updateMeal(Long id, String newName) {
-        Meal meal = mealRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Meal not found"));
-        meal.setName(newName);
-        mealRepository.save(meal);
-        return "Meal updated to '" + newName + "'";
-    }
-
-    public String deleteMeal(Long id) {
-        Meal meal = mealRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Meal not found"));
-        mealRepository.delete(meal);
-        return "Meal deleted";
-    }
-
-    public List<Meal> getAllMeals() {
-    return mealRepository.findAll();
-    }
-
-    public List<MealProduct> getAllMealProducts() {
-        return mealProductRepository.findAll();
-    }
-
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
-    }
-
-    public String createMealProduct(Integer grams, Long mealId, Long productId) {
-        Meal meal = mealRepository.findById(mealId)
-                .orElseThrow(() -> new RuntimeException("Meal not found"));
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        
-        MealProduct mealProduct = new MealProduct(grams, meal, product);
-        mealProductRepository.save(mealProduct);
-        return "MealProduct created with ID: " + mealProduct.getId();
-    }
-
-    public MealProduct getMealProduct(Long id) {
-        return mealProductRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("MealProduct not found"));
-    }
-
-    public String updateMealProduct(Long id, Integer grams) {
-        MealProduct mealProduct = mealProductRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("MealProduct not found"));
-        mealProduct.setGrams(grams);
-        mealProductRepository.save(mealProduct);
-        return "MealProduct updated";
-    }
-
-    public String deleteMealProduct(Long id) {
-        MealProduct mealProduct = mealProductRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("MealProduct not found"));
-        mealProductRepository.delete(mealProduct);
-        return "MealProduct deleted";
-    }
-
-    public String createProduct(String name, Integer caloriesPer100g) {
-        Product product = new Product(name, caloriesPer100g);
-        productRepository.save(product);
-        return "Product created with ID: " + product.getId();
-    }
-
-    public Product getProduct(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-    }
-
-    public String updateProduct(Long id, String name, Integer caloriesPer100g) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setName(name);
-        product.setCaloriesPer100g(caloriesPer100g);
-        productRepository.save(product);
-        return "Product updated";
-    }
-
-    public String deleteProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        productRepository.delete(product);
-        return "Product deleted";
     }
 }

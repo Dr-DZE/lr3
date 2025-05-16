@@ -14,49 +14,53 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.tryme.Model.Product;
 import com.example.tryme.services.CaloriesService;
+import com.example.tryme.services.ProductService;
 
 @RestController
 @RequestMapping("/products")
 public class ProductController {
+    private final ProductService productService;
     private final CaloriesService caloriesService;
 
     @Autowired
-    public ProductController(CaloriesService caloriesService) {
+    public ProductController(ProductService productService, 
+                           CaloriesService caloriesService) {
+        this.productService = productService;
         this.caloriesService = caloriesService;
     }
 
-	@GetMapping("/CalculateCalories") 
-	public List<String> get(@RequestParam Integer productCount,  
-        @RequestParam String[] food, 
-		@RequestParam Integer[] gram) 
-    {
-		return caloriesService.calculateCalories(productCount, food, gram);
-	}
+    @GetMapping("/CalculateCalories")
+    public List<String> calculateCalories(
+            @RequestParam Integer productCount,
+            @RequestParam String[] food,
+            @RequestParam Integer[] gram) {
+        return caloriesService.calculateCalories(productCount, food, gram);
+    }
 
     @PostMapping("/create")
     public String createProduct(@RequestParam String name, @RequestParam Integer caloriesPer100g) {
-        return caloriesService.createProduct(name, caloriesPer100g);
+        return productService.createProduct(name, caloriesPer100g);
     }
 
     @GetMapping("/{id}")
     public Product getProduct(@PathVariable Long id) {
-        return caloriesService.getProduct(id);
+        return productService.getProduct(id);
     }
 
     @PutMapping("/update/{id}")
-    public String updateProduct(@PathVariable Long id, @RequestParam String name, @RequestParam Integer caloriesPer100g) {
-        return caloriesService.updateProduct(id, name, caloriesPer100g);
+    public String updateProduct(@PathVariable Long id, 
+                               @RequestParam String name, 
+                               @RequestParam Integer caloriesPer100g) {
+        return productService.updateProduct(id, name, caloriesPer100g);
     }
 
     @DeleteMapping("/delete/{id}")
     public String deleteProduct(@PathVariable Long id) {
-        return caloriesService.deleteProduct(id);
+        return productService.deleteProduct(id);
     }
 
     @GetMapping("/")
     public List<Product> getAllProducts() {
-        return caloriesService.getAllProducts();
+        return productService.getAllProducts();
     }
 }
-
-// Пример запроса: http://localhost:8080/products/calculate?productCount=2&food=яблоко&food=груша&gram=100&gram=150
