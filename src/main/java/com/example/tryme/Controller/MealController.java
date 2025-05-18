@@ -3,6 +3,7 @@ package com.example.tryme.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,12 @@ public class MealController {
     @Autowired
     public MealController(MealService mealService) {
         this.mealService = mealService;
+    }
+
+    @GetMapping("/by-product")
+    @Cacheable(value = "mealsByProduct", key = "#productName")
+    public List<Meal> getMealsByProduct(@RequestParam String productName) {
+        return mealService.findMealsByProductName(productName);
     }
 
     @PostMapping("/create")

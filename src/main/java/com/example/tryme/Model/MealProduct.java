@@ -1,6 +1,13 @@
 package com.example.tryme.Model;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class MealProduct {
@@ -12,10 +19,12 @@ public class MealProduct {
 
     @ManyToOne
     @JoinColumn(name = "meal_id")
+    @JsonBackReference(value = "meal-mealProduct")
     private Meal meal;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @JsonBackReference(value = "product-mealProduct")
     private Product product;
 
     public MealProduct() {}

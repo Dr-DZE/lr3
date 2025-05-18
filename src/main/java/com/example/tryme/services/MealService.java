@@ -15,6 +15,10 @@ public class MealService {
         this.mealRepository = mealRepository;
     }
 
+        public List<Meal> findMealsByProductName(String productName) {
+        return mealRepository.findMealsByProductName(productName);
+    }
+
     public String createMeal(String mealName) {
         Meal meal = new Meal(mealName);
         mealRepository.save(meal);
