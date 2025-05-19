@@ -1,6 +1,7 @@
 package com.example.tryme.services;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -29,13 +30,16 @@ public class CaloriesService {
     private final ProductRepository productRepository;
     private final MealRepository mealRepository;
     private final MealProductRepository mealProductRepository;
+    private final CacheService cacheService;
 
     public CaloriesService(ProductRepository productRepository, 
                          MealRepository mealRepository,
-                         MealProductRepository mealProductRepository) {
+                         MealProductRepository mealProductRepository,
+                         CacheService cacheService) {
         this.productRepository = productRepository;
         this.mealRepository = mealRepository;
         this.mealProductRepository = mealProductRepository;
+        this.cacheService = cacheService;
     }
 
     private String sendPostRequest(String query) {
@@ -55,6 +59,12 @@ public class CaloriesService {
     }
 
     public List<String> calculateCalories(Integer productCount, String[] food, Integer[] gram) {
+        String cacheKey = String.join(":", food) + ":" + String.join(":", Arrays.stream(gram).map(String::valueOf).toArray(String[]::new));
+        List<String> cachedResult = cacheService.getFromCache("calories", cacheKey);
+        if (cachedResult != null) {
+            return cachedResult;
+        }
+
         List<String> listOfProducts = new ArrayList<>();
         Integer[] caloriesIn100 = new Integer[productCount];
         Integer totalCalories = 0;
@@ -74,6 +84,7 @@ public class CaloriesService {
         }
 
         listOfProducts.add("Total calories: " + totalCalories);
+        cacheService.putToCache("calories", cacheKey, listOfProducts);
         return listOfProducts;
     }
 
@@ -101,6 +112,8 @@ public class CaloriesService {
     }
 
     public String addProductToMeal(Long mealId, String productName, Integer grams) {
+        cacheService.clearCache("meals");
+        cacheService.clearCache("mealProducts");
         Meal meal = mealRepository.findById(mealId)
                 .orElseThrow(() -> new RuntimeException("Meal not found"));
         

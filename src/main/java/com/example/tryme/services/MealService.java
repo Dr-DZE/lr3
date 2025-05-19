@@ -10,27 +10,43 @@ import com.example.tryme.Repository.MealRepository;
 @Service
 public class MealService {
     private final MealRepository mealRepository;
+    private final CacheService cacheService;
 
-    public MealService(MealRepository mealRepository) {
+    public MealService(MealRepository mealRepository, CacheService cacheService) {
         this.mealRepository = mealRepository;
+        this.cacheService = cacheService;
     }
 
-        public List<Meal> findMealsByProductName(String productName) {
-        return mealRepository.findMealsByProductName(productName);
+    public List<Meal> findMealsByProductName(String productName) {
+        List<Meal> cachedMeals = cacheService.getFromCache("meals", productName);
+        if (cachedMeals != null) {
+            return cachedMeals;
+        }
+        List<Meal> meals = mealRepository.findMealsByProductName(productName);
+        cacheService.putToCache("meals", productName, meals);
+        return meals;
     }
 
     public String createMeal(String mealName) {
+        cacheService.clearCache("meals");
         Meal meal = new Meal(mealName);
         mealRepository.save(meal);
         return "Meal '" + mealName + "' created with ID: " + meal.getId();
     }
 
     public Meal getMeal(Long id) {
-        return mealRepository.findById(id)
+        List<Meal> cachedMeals = cacheService.getFromCache("meals", "id:" + id);
+        if (cachedMeals != null && !cachedMeals.isEmpty()) {
+            return cachedMeals.get(0);
+        }
+        Meal meal = mealRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meal not found"));
+        cacheService.putToCache("meals", "id:" + id, List.of(meal));
+        return meal;
     }
 
     public String updateMeal(Long id, String newName) {
+        cacheService.clearCache("meals");
         Meal meal = mealRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meal not found"));
         meal.setName(newName);
@@ -39,6 +55,7 @@ public class MealService {
     }
 
     public String deleteMeal(Long id) {
+        cacheService.clearCache("meals");
         Meal meal = mealRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meal not found"));
         mealRepository.delete(meal);
@@ -46,6 +63,12 @@ public class MealService {
     }
 
     public List<Meal> getAllMeals() {
-        return mealRepository.findAll();
+        List<Meal> cachedMeals = cacheService.getFromCache("meals", "all");
+        if (cachedMeals != null) {
+            return cachedMeals;
+        }
+        List<Meal> meals = mealRepository.findAll();
+        cacheService.putToCache("meals", "all", meals);
+        return meals;
     }
 }

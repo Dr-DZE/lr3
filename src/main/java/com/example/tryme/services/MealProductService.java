@@ -10,13 +10,16 @@ import com.example.tryme.Repository.MealProductRepository;
 @Service
 public class MealProductService {
     private final MealProductRepository mealProductRepository;
+    private final CacheService cacheService;
 
-    public MealProductService(MealProductRepository mealProductRepository) {
+    public MealProductService(MealProductRepository mealProductRepository, CacheService cacheService) {
         this.mealProductRepository = mealProductRepository;
+        this.cacheService = cacheService;
     }
 
     public String createMealProduct(Integer grams, Long mealId, Long productId, 
                                   MealService mealService, ProductService productService) {
+        cacheService.clearCache("mealProducts");
         var meal = mealService.getMeal(mealId);
         var product = productService.getProduct(productId);
         
@@ -26,11 +29,18 @@ public class MealProductService {
     }
 
     public MealProduct getMealProduct(Long id) {
-        return mealProductRepository.findById(id)
+        List<MealProduct> cachedMealProducts = cacheService.getFromCache("mealProducts", "id:" + id);
+        if (cachedMealProducts != null && !cachedMealProducts.isEmpty()) {
+            return cachedMealProducts.get(0);
+        }
+        MealProduct mealProduct = mealProductRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("MealProduct not found"));
+        cacheService.putToCache("mealProducts", "id:" + id, List.of(mealProduct));
+        return mealProduct;
     }
 
     public String updateMealProduct(Long id, Integer grams) {
+        cacheService.clearCache("mealProducts");
         MealProduct mealProduct = mealProductRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("MealProduct not found"));
         mealProduct.setGrams(grams);
@@ -39,6 +49,7 @@ public class MealProductService {
     }
 
     public String deleteMealProduct(Long id) {
+        cacheService.clearCache("mealProducts");
         MealProduct mealProduct = mealProductRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("MealProduct not found"));
         mealProductRepository.delete(mealProduct);
@@ -46,6 +57,12 @@ public class MealProductService {
     }
 
     public List<MealProduct> getAllMealProducts() {
-        return mealProductRepository.findAll();
+        List<MealProduct> cachedMealProducts = cacheService.getFromCache("mealProducts", "all");
+        if (cachedMealProducts != null) {
+            return cachedMealProducts;
+        }
+        List<MealProduct> mealProducts = mealProductRepository.findAll();
+        cacheService.putToCache("mealProducts", "all", mealProducts);
+        return mealProducts;
     }
 }
